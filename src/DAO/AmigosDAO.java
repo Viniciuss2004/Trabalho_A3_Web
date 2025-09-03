@@ -1,26 +1,28 @@
 package DAO;
 
+import Config.ConfigDb;
 import Model.Amigos;
-import java.util.*;
-import java.sql.Connection;
-import java.sql.DriverManager;
+
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 
 public class AmigosDAO {
 
     public static ArrayList<Amigos> MinhaLista = new ArrayList<>();
+    public ConfigDb conexao;
 
     public AmigosDAO() {
+        this.conexao = new ConfigDb();
     }
 
     public int maiorID() throws SQLException {
 
         int maiorID = 0;
         try {
-            try (Statement stmt = this.getConexao().createStatement()) {
+            try (Statement stmt = conexao.getConexao().createStatement()) {
                 ResultSet res = stmt.executeQuery("SELECT MAX(id_a) id_a FROM amigos");
                 res.next();
                 maiorID = res.getInt("id_a");
@@ -32,47 +34,12 @@ public class AmigosDAO {
         return maiorID;
     }
 
-    public Connection getConexao() {
-
-        Connection connection = null;
-
-        try {
-
-            String driver = "com.mysql.cj.jdbc.Driver";
-            Class.forName(driver);
-
-            String server = "localhost";
-            String database = "***";
-            String url = "jdbc:mysql://" + server + ":3306/" + database;
-            String user = "***";
-            String password = "***";
-
-            connection = DriverManager.getConnection(url, user, password);
-
-            if (connection != null) {
-                System.out.println("Status: Conectado!");
-            } else {
-                System.out.println("Status: NãO CONECTADO!");
-            }
-
-            return connection;
-
-        } catch (ClassNotFoundException e) {
-            System.out.println("O driver nao foi encontrado. " + e.getMessage());
-            return null;
-
-        } catch (SQLException e) {
-            System.out.println("Nao foi possivel conectar...");
-            return null;
-        }
-    }
-
     public ArrayList getMinhaLista() {
 
         MinhaLista.clear();
 
         try {
-            try (Statement stmt = this.getConexao().createStatement()) {
+            try (Statement stmt = conexao.getConexao().createStatement()) {
                 ResultSet res = stmt.executeQuery("SELECT * FROM amigos");
                 while (res.next()) {
 
@@ -96,7 +63,7 @@ public class AmigosDAO {
         String sql = "INSERT INTO amigos(id_a,nome,telefone) VALUES(?,?,?)";
 
         try {
-            try (PreparedStatement stmt = this.getConexao().prepareStatement(sql)) {
+            try (PreparedStatement stmt = conexao.getConexao().prepareStatement(sql)) {
                 stmt.setInt(1, objeto.getId_a());
                 stmt.setString(2, objeto.getNome_a());
                 stmt.setString(3, objeto.getTelefone());
@@ -113,7 +80,7 @@ public class AmigosDAO {
 
     public boolean DeleteAmigosBD(int id_a) {
         try {
-            try (Statement stmt = this.getConexao().createStatement()) {
+            try (Statement stmt = conexao.getConexao().createStatement()) {
                 stmt.executeUpdate("DELETE FROM amigos WHERE id_a = " + id_a);
             }
 
@@ -128,7 +95,7 @@ public class AmigosDAO {
         String sql = "UPDATE amigos set nome = ? , telefone = ? WHERE id_a = ?";
 
         try {
-            try (PreparedStatement stmt = this.getConexao().prepareStatement(sql)) {
+            try (PreparedStatement stmt = conexao.getConexao().prepareStatement(sql)) {
                 stmt.setString(1, objeto.getNome_a());
                 stmt.setString(2, objeto.getTelefone());
                 stmt.setInt(3, objeto.getId_a());
@@ -149,7 +116,7 @@ public class AmigosDAO {
         objeto.setId_a(id_a);
 
         try {
-            try (Statement stmt = this.getConexao().createStatement()) {
+            try (Statement stmt = conexao.getConexao().createStatement()) {
                 ResultSet res = stmt.executeQuery("SELECT * FROM amigos WHERE id = " + id_a);
                 res.next();
 
