@@ -1,11 +1,12 @@
 package View;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
+import Config.ConfigDb;
+import Model.Emprestimo_M;
+
+import javax.swing.*;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import Model.Emprestimo_M;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -13,31 +14,24 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.ImageIcon;
-import javax.swing.JOptionPane;
 
 public class Emprestimo extends javax.swing.JFrame {
 
     private Map<String, String> partesMap;
     private Emprestimo_M objEmp;
-    private Connection conexao;
     private ResultSet resultSet;
+    public ConfigDb conexao;
 
     public Emprestimo() {
+        this.conexao = new ConfigDb();
         initComponents();
         setIcon();
         this.objEmp = new Emprestimo_M();
-        this.partesMap = new HashMap<>(); 
+        this.partesMap = new HashMap<>();
 
         try {
-            
-            String url = "jdbc:mysql://localhost/trabalho";
-            String usuario = "root";
-            String senha = "vini18";
-            conexao = DriverManager.getConnection(url, usuario, senha);
-
             String consulta = "SELECT Nome FROM amigos";
-            Statement statement = conexao.createStatement();
+            Statement statement = conexao.getConexao().createStatement();
             resultSet = statement.executeQuery(consulta);
 
             while (resultSet.next()) {
@@ -49,14 +43,8 @@ public class Emprestimo extends javax.swing.JFrame {
         }
 
         try {
-
-            String url = "jdbc:mysql://localhost/trabalho";
-            String usuario = "root";
-            String senha = "vini18";
-            conexao = DriverManager.getConnection(url, usuario, senha);
-
             String consulta = "SELECT CONCAT(Id_f, ' - ',Nome) AS IdeNome FROM ferramentas";
-            Statement statement = conexao.createStatement();
+            Statement statement = conexao.getConexao().createStatement();
             resultSet = statement.executeQuery(consulta);
 
             while (resultSet.next()) {
@@ -336,12 +324,12 @@ public class Emprestimo extends javax.swing.JFrame {
             }
 
             String updateQuery = "UPDATE ferramentas SET Status = 'Emprestado' WHERE Id_f = " + id_f;
-            Statement statement = conexao.createStatement();
+            Statement statement = conexao.getConexao().createStatement();
             statement.executeUpdate(updateQuery);
-            conexao.prepareStatement(updateQuery);
+            conexao.getConexao().prepareStatement(updateQuery);
 
             String insertQuery = "INSERT INTO emprestimos (Nome, Ferramenta, Data_Emprestimo, Data_Devolucao, Cod) VALUES (?, ?, ?, ?, ?)";
-            var preparedStatement = conexao.prepareStatement(insertQuery);
+            var preparedStatement = conexao.getConexao().prepareStatement(insertQuery);
             
             preparedStatement.setString(1, nome_e);
             preparedStatement.setString(2, ferramenta);

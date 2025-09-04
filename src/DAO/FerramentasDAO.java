@@ -1,26 +1,28 @@
 package DAO;
 
+import Config.ConfigDb;
 import Model.Ferramentas;
-import java.util.*;
-import java.sql.Connection;
-import java.sql.DriverManager;
+
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 
 public class FerramentasDAO {
 
     public static ArrayList<Ferramentas> MinhaLista = new ArrayList<>();
+    public ConfigDb conexao;
 
     public FerramentasDAO() {
+        this.conexao = new ConfigDb();
     }
 
     public int maiorID() throws SQLException {
 
         int maiorID = 0;
         try {
-            try (Statement stmt = this.getConexao().createStatement()) {
+            try (Statement stmt = conexao.getConexao().createStatement()) {
                 ResultSet res = stmt.executeQuery("SELECT MAX(id_f) id_f FROM ferramentas");
                 res.next();
                 maiorID = res.getInt("id_f");
@@ -32,47 +34,12 @@ public class FerramentasDAO {
         return maiorID;
     }
 
-    public Connection getConexao() {
-
-        Connection connection = null;
-
-        try {
-
-            String driver = "com.mysql.cj.jdbc.Driver";
-            Class.forName(driver);
-
-            String server = "localhost";
-            String database = "***";
-            String url = "jdbc:mysql://" + server + ":3306/" + database;
-            String user = "***";
-            String password = "***";
-
-            connection = DriverManager.getConnection(url, user, password);
-
-            if (connection != null) {
-                System.out.println("Status: Conectado!");
-            } else {
-                System.out.println("Status: NãO CONECTADO!");
-            }
-
-            return connection;
-
-        } catch (ClassNotFoundException e) {
-            System.out.println("O driver nao foi encontrado. " + e.getMessage());
-            return null;
-
-        } catch (SQLException e) {
-            System.out.println("Nao foi possivel conectar...");
-            return null;
-        }
-    }
-
     public ArrayList getMinhaLista() {
 
         MinhaLista.clear();
 
         try {
-            try (Statement stmt = this.getConexao().createStatement()) {
+            try (Statement stmt = conexao.getConexao().createStatement()) {
                 ResultSet res = stmt.executeQuery("SELECT * FROM ferramentas");
                 while (res.next()) {
 
@@ -98,7 +65,7 @@ public class FerramentasDAO {
         String sql = "INSERT INTO ferramentas(id_f,nome,status,marca,aquisicao) VALUES(?,?,?,?,?)";
 
         try {
-            try (PreparedStatement stmt = this.getConexao().prepareStatement(sql)) {
+            try (PreparedStatement stmt = conexao.getConexao().prepareStatement(sql)) {
                 stmt.setInt(1, objeto.getId_f());
                 stmt.setString(2, objeto.getNome_f());
                 stmt.setString(3, objeto.getStatus());
@@ -117,7 +84,7 @@ public class FerramentasDAO {
 
     public boolean DeleteFerramentasBD(int id_f) {
         try {
-            try (Statement stmt = this.getConexao().createStatement()) {
+            try (Statement stmt = conexao.getConexao().createStatement()) {
                 stmt.executeUpdate("DELETE FROM ferramentas WHERE id_f = " + id_f);
             }
 
@@ -132,7 +99,7 @@ public class FerramentasDAO {
         String sql = "UPDATE ferramentas set nome = ?, status = ? ,marca = ? ,aquisicao = ? WHERE id_f = ?";
 
         try {
-            try (PreparedStatement stmt = this.getConexao().prepareStatement(sql)) {
+            try (PreparedStatement stmt = conexao.getConexao().prepareStatement(sql)) {
                 stmt.setString(1, objeto.getNome_f());
                 stmt.setString(2, objeto.getStatus());
                 stmt.setString(3, objeto.getMarca());
@@ -155,7 +122,7 @@ public class FerramentasDAO {
         objeto.setId_f(id_f);
 
         try {
-            try (Statement stmt = this.getConexao().createStatement()) {
+            try (Statement stmt = conexao.getConexao().createStatement()) {
                 ResultSet res = stmt.executeQuery("SELECT * FROM ferramentas WHERE id_f = " + id_f);
                 res.next();
 

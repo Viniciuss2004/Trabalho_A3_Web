@@ -1,36 +1,33 @@
 package View;
 
-import java.sql.DriverManager;
+import Config.ConfigDb;
 import Model.Emprestimo_M;
-import java.sql.Connection;
+
+import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.ImageIcon;
-import javax.swing.JOptionPane;
-import javax.swing.SwingConstants;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.DefaultTableModel;
 
 public final class Devolucao extends javax.swing.JFrame {
 
     private final Emprestimo_M objEmp;
-    private Connection conexao;
+    public ConfigDb conexao;
 
     public Devolucao() {
+        this.conexao = new ConfigDb();
         initComponents();
         this.objEmp = new Emprestimo_M();
         this.carregaTabela();
         setIcon();
-
     }
 
     public void setIcon() {
         ImageIcon icon = new ImageIcon(getClass().getResource("/Imagens/Icone.png"));
         setIconImage(icon.getImage());
-
     }
 
     @SuppressWarnings("unchecked")
@@ -150,14 +147,10 @@ public final class Devolucao extends javax.swing.JFrame {
 
             }
             
-            String url = "jdbc:mysql://localhost/trabalho";
-            String usuario = "root";
-            String senha = "vini18";
-            conexao = DriverManager.getConnection(url, usuario, senha);
             String updateQuery = "UPDATE ferramentas SET Status = 'Disponível' WHERE Id_f = " + id_f;
-            Statement statement = conexao.createStatement();
+            Statement statement = conexao.getConexao().createStatement();
             statement.executeUpdate(updateQuery);
-            conexao.prepareStatement(updateQuery);
+            conexao.getConexao().prepareStatement(updateQuery);
 
         } catch (Mensagens erro) {
             JOptionPane.showMessageDialog(null, erro.getMessage());
@@ -170,7 +163,7 @@ public final class Devolucao extends javax.swing.JFrame {
     }//GEN-LAST:event_b_apagarActionPerformed
 
     private void formComponentHidden(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentHidden
-        
+
     }//GEN-LAST:event_formComponentHidden
 
     private void b_cancelarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_b_cancelarActionPerformed
@@ -193,11 +186,8 @@ public final class Devolucao extends javax.swing.JFrame {
         }
 
         try {
-
-            conexao = DriverManager.getConnection("jdbc:mysql://localhost:3306/trabalho", "root", "vini18");
-
             String sql = "SELECT Id_e, Nome, Ferramenta, Cod FROM emprestimos";
-            Statement statement = conexao.createStatement();
+            Statement statement = conexao.getConexao().createStatement();
 
             ResultSet resultSet = statement.executeQuery(sql);
 
@@ -217,7 +207,7 @@ public final class Devolucao extends javax.swing.JFrame {
             try {
 
                 if (conexao != null) {
-                    conexao.close();
+                    conexao.getConexao().close();
                 }
             } catch (SQLException ex) {
             }

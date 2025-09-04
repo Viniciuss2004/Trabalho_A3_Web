@@ -1,28 +1,31 @@
 package DAO;
 
+import Config.ConfigDb;
 import Model.Emprestimo_M;
-import java.util.*;
-import java.sql.Connection;
-import java.sql.DriverManager;
+
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 
 public class EmprestimoDAO {
 
     public static ArrayList<Emprestimo_M> MinhaLista = new ArrayList<>();
+    public ConfigDb conexao;
 
     public EmprestimoDAO() {
+        this.conexao = new ConfigDb();
     }
 
     public int maiorID() throws SQLException {
 
         int maiorID = 0;
         try {
-            try (Statement stmt = this.getConexao().createStatement()) {
+            try (Statement stmt = conexao.getConexao().createStatement()) {
                 ResultSet res = stmt.executeQuery("SELECT MAX(id_e) id_e FROM emprestimos");
                 res.next();
                 maiorID = res.getInt("id_e");
@@ -34,46 +37,11 @@ public class EmprestimoDAO {
         return maiorID;
     }
 
-    public Connection getConexao() {
-
-        Connection connection = null;
-
-        try {
-
-            String driver = "com.mysql.cj.jdbc.Driver";
-            Class.forName(driver);
-
-            String server = "localhost";
-            String database = "***";
-            String url = "jdbc:mysql://" + server + ":3306/" + database;
-            String user = "***";
-            String password = "***";
-
-            connection = DriverManager.getConnection(url, user, password);
-
-            if (connection != null) {
-                System.out.println("Status: Conectado!");
-            } else {
-                System.out.println("Status: NãO CONECTADO!");
-            }
-
-            return connection;
-
-        } catch (ClassNotFoundException e) {
-            System.out.println("O driver nao foi encontrado. " + e.getMessage());
-            return null;
-
-        } catch (SQLException e) {
-            System.out.println("Nao foi possivel conectar...");
-            return null;
-        }
-    }
-
     public ArrayList<Emprestimo_M> getMinhaLista() {
         MinhaLista.clear();
 
         try {
-            try (Statement stmt = this.getConexao().createStatement()) {
+            try (Statement stmt = conexao.getConexao().createStatement()) {
                 ResultSet res = stmt.executeQuery("SELECT Id_e, Nome, REGEXP_REPLACE(Ferramenta, '[0-9]', '') AS Ferramenta, DATE_FORMAT(Data_Emprestimo, ' %d / %m / %Y') AS Data_Emprestimo, DATE_FORMAT(Data_Devolucao, ' %d / %m / %Y') AS Data_Devolucao FROM emprestimos;");
                 while (res.next()) {
                     int id_e = res.getInt("Id_e");
@@ -106,7 +74,7 @@ public class EmprestimoDAO {
         String sql = "INSERT INTO emprestimos (id_e,nome,ferramenta,data_emprestimo,data_devolucao,cao) VALUES(?,?,?,?,?,?)";
 
         try {
-            try (PreparedStatement stmt = this.getConexao().prepareStatement(sql)) {
+            try (PreparedStatement stmt = conexao.getConexao().prepareStatement(sql)) {
                 stmt.setInt(1, objeto.getId_e());
                 stmt.setString(2, objeto.getNome_e());
                 stmt.setString(3, objeto.getFerramenta());
@@ -126,7 +94,7 @@ public class EmprestimoDAO {
 
     public boolean DeleteEmprestimoBD(int id_e) {
         try {
-            try (Statement stmt = this.getConexao().createStatement()) {
+            try (Statement stmt = conexao.getConexao().createStatement()) {
                 stmt.executeUpdate("DELETE FROM emprestimos WHERE id_e = " + id_e);
             }
 
@@ -141,7 +109,7 @@ public class EmprestimoDAO {
         String sql = "UPDATE emprestimos set nome = ? , ferramenta = ? , data_emprestimo = ? , data_devolucao = ?  WHERE id_e = ?";
 
         try {
-            try (PreparedStatement stmt = this.getConexao().prepareStatement(sql)) {
+            try (PreparedStatement stmt = conexao.getConexao().prepareStatement(sql)) {
                 stmt.setString(1, objeto.getNome_e());
                 stmt.setString(2, objeto.getFerramenta());
                 stmt.setString(3, objeto.getData_e());
@@ -165,7 +133,7 @@ public class EmprestimoDAO {
         objeto.setId_e(id_e);
 
         try {
-            try (Statement stmt = this.getConexao().createStatement()) {
+            try (Statement stmt = conexao.getConexao().createStatement()) {
                 ResultSet res = stmt.executeQuery("SELECT * FROM emprestimos WHERE id_e = " + id_e);
                 res.next();
 
